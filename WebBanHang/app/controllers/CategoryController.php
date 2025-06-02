@@ -66,7 +66,7 @@ class CategoryController {
 
     public function delete(int $id): void {
         if ($this->categoryModel->deleteCategory($id)) {
-            header('Location: /webbanhang/Catgory/list');
+            header('Location: /webbanhang/Category/list');
             exit();
         } else {
             echo "Đã xảy ra lỗi khi xóa danh mục.";

@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 // Bật hiển thị lỗi trong quá trình phát triển (xóa khi triển khai)
 ini_set('display_errors', 1);
@@ -14,6 +15,8 @@ require_once BASE_PATH . '/app/models/ProductModel.php';
 require_once BASE_PATH . '/app/models/CategoryModel.php';
 require_once BASE_PATH . '/app/controllers/ProductController.php';
 require_once BASE_PATH . '/app/controllers/CategoryController.php';
+require_once BASE_PATH . '/app/controllers/AccountController.php';
+require_once BASE_PATH . '/app/helpers/SessionHelper.php';
 
 // Lấy URL từ query string hoặc REQUEST_URI
 $url = isset($_GET['url']) ? $_GET['url'] : 'Product/index';
@@ -22,10 +25,9 @@ $url = filter_var($url, FILTER_SANITIZE_URL);
 $url = explode('/', $url);
 
 // Xác định controller, action, và tham số
-// $controllerName = isset($url[0]) ? ucfirst($url[0]) . 'Controller' : 'ProductController';
-$controllerName = isset($url[0]) ? ucfirst($url[0]) . 'Controller' : 'CategoryController';
-$action = isset($url[1]) ? $url[1] : 'index';
-$param = isset($url[2]) ? $url[2] : null;
+$controllerName = !empty($url[0]) ? ucfirst($url[0]) . 'Controller' : 'ProductController';
+$action = !empty($url[1]) ? $url[1] : 'index';
+$params = array_slice($url, 2); // Lấy tất cả các tham số từ phần tử thứ 3 trở đi
 
 // Kiểm tra controller tồn tại
 $controllerFile = BASE_PATH . "/app/controllers/$controllerName.php";
@@ -34,12 +36,8 @@ if (file_exists($controllerFile)) {
 
     // Kiểm tra action tồn tại
     if (method_exists($controller, $action)) {
-        // Gọi action với tham số (nếu có)
-        if ($param !== null) {
-            $controller->$action($param);
-        } else {
-            $controller->$action();
-        }
+        // Gọi action với các tham số
+        call_user_func_array([$controller, $action], $params);
     } else {
         // Xử lý lỗi: action không tồn tại
         header('HTTP/1.0 404 Not Found');

@@ -31,17 +31,6 @@ h1 {
     justify-content: center;
     gap: 8px;
 }
-.alert {
-    background: #f8d7da;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    color: #721c24;
-}
-.alert ul {
-    list-style: disc;
-    padding-left: 20px;
-}
 .form-group {
     margin-bottom: 15px;
 }
@@ -53,7 +42,8 @@ h1 {
     margin-bottom: 5px;
     gap: 8px;
 }
-.form-group input, .form-group textarea {
+.form-group input, 
+.form-group textarea {
     width: 100%;
     padding: 10px;
     background: #ffffff;
@@ -61,9 +51,9 @@ h1 {
     border-radius: 5px;
     color: #000000;
     font-size: 14px;
-    transition: border-color 0.2s ease;
 }
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus, 
+.form-group textarea:focus {
     outline: none;
     border-color: #555555;
 }
@@ -90,9 +80,6 @@ button:hover {
     background: #555555;
     color: #ffffff;
 }
-button:hover .bi {
-    color: #ffffff;
-}
 a.back-link {
     display: flex;
     align-items: center;
@@ -110,49 +97,51 @@ a.back-link:hover {
     font-size: 1.1em;
     color: #333333;
 }
+button:hover .bi {
+    color: #ffffff;
+}
 </style>
 
 <div class="container">
-    <h1><i class="bi bi-plus-circle"></i> Thêm Danh Mục Mới</h1>
+    <h1><i class="bi bi-credit-card"></i> Thanh Toán</h1>
 
-    <?php if (!empty($errors)): ?>
-        <div class="alert">
-            <ul>
-                <?php foreach ($errors as $error): ?>
-                    <li><i class="bi bi-exclamation-circle"></i> <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-    <?php endif; ?>
-
-    <form method="POST" action="/webbanhang/Category/save" onsubmit="return validateForm();">
+    <form method="POST" action="/webbanhang/Product/processCheckout" onsubmit="return validateForm();">
         <div class="form-group">
-            <label for="name"><i class="bi bi-tag"></i> Tên Danh Mục:</label>
-            <input type="text" id="name" name="name" placeholder="Nhập tên danh mục" required>
+            <label for="name"><i class="bi bi-person"></i> Họ Tên:</label>
+            <input type="text" id="name" name="name" placeholder="Nhập họ tên" required>
         </div>
 
         <div class="form-group">
-            <label for="description"><i class="bi bi-text-paragraph"></i> Mô Tả:</label>
-            <textarea id="description" name="description" placeholder="Nhập mô tả danh mục" required></textarea>
+            <label for="phone"><i class="bi bi-telephone"></i> Số Điện Thoại:</label>
+            <input type="text" id="phone" name="phone" placeholder="Nhập số điện thoại" required>
         </div>
 
-        <button type="submit"><i class="bi bi-save"></i> Thêm Danh Mục</button>
+        <div class="form-group">
+            <label for="address"><i class="bi bi-geo-alt"></i> Địa Chỉ:</label>
+            <textarea id="address" name="address" placeholder="Nhập địa chỉ giao hàng" required></textarea>
+        </div>
+
+        <button type="submit"><i class="bi bi-credit-card"></i> Thanh Toán</button>
+        <a href="/webbanhang/Product/cart" class="back-link"><i class="bi bi-arrow-left"></i> Quay Lại Giỏ Hàng</a>
     </form>
-
-    <a href="/webbanhang/Category/list" class="back-link"><i class="bi bi-arrow-left"></i> Quay Lại Danh Sách Danh Mục</a>
 </div>
 
 <script>
 function validateForm() {
     const name = document.getElementById('name').value.trim();
-    const description = document.getElementById('description').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
     
     if (name.length < 3) {
-        alert('Tên danh mục phải có ít nhất 3 ký tự.');
+        alert('Họ tên phải có ít nhất 3 ký tự.');
         return false;
     }
-    if (description.length < 10) {
-        alert('Mô tả phải có ít nhất 10 ký tự.');
+    if (!/^\d{10,11}$/.test(phone)) {
+        alert('Số điện thoại phải có 10 hoặc 11 chữ số.');
+        return false;
+    }
+    if (address.length < 10) {
+        alert('Địa chỉ phải có ít nhất 10 ký tự.');
         return false;
     }
     return true;

@@ -20,7 +20,10 @@ class ProductModel {
     }
 
     public function getProductById(int $id): ?object {
-        $query = "SELECT * FROM {$this->table_name} WHERE id = :id";
+        $query = "SELECT p.*, c.name AS category_name 
+                FROM {$this->table_name} p 
+                LEFT JOIN category c ON p.category_id = c.id 
+                WHERE p.id = :id";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
@@ -41,17 +44,23 @@ class ProductModel {
         if ($price < 0) {
             $errors['price'] = 'Giá sản phẩm không hợp lệ';
         }
+        if ($price > 999999999.99) {
+            $errors['price'] = 'Giá sản phẩm quá lớn';
+        }
 
         if (!empty($errors)) {
             return $errors;
         }
 
+        $cleanedName = htmlspecialchars(strip_tags($name));
+        $cleanedDescription = htmlspecialchars(strip_tags($description));
+
         $query = "INSERT INTO {$this->table_name} (name, description, price, category_id, image) 
-                  VALUES (:name, :description, :price, :category_id, :image)";
+                VALUES (:name, :description, :price, :category_id, :image)";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':name', htmlspecialchars(strip_tags($name)));
-        $stmt->bindParam(':description', htmlspecialchars(strip_tags($description)));
+        $stmt->bindParam(':name', $cleanedName);
+        $stmt->bindParam(':description', $cleanedDescription);
         $stmt->bindParam(':price', $price, PDO::PARAM_STR);
         $stmt->bindParam(':category_id', $category_id, PDO::PARAM_INT);
         $stmt->bindParam(':image', $image, PDO::PARAM_STR);
@@ -59,10 +68,27 @@ class ProductModel {
         return $stmt->execute();
     }
 
-    public function updateProduct(int $id, string $name, string $description, float $price, int $category_id, $image): bool {
+    public function updateProduct(int $id, string $name, string $description, float $price, int $category_id, $image): mixed {
+        $errors = [];
+
+        if (empty($name)) {
+            $errors['name'] = 'Tên sản phẩm không được để trống';
+        }
+        if (empty($description)) {
+            $errors['description'] = 'Mô tả không được để trống';
+        }
+        if ($price < 0) {
+            $errors['price'] = 'Giá sản phẩm không hợp lệ';
+        }
+
+        if (!empty($errors)) {
+            return $errors;
+        }
+
         $query = "UPDATE {$this->table_name} 
-                  SET name = :name, description = :description, price = :price, category_id = :category_id, image=:image 
-                  WHERE id = :id";
+                SET name = :name, description = :description, price = :price, 
+                    category_id = :category_id, image = :image 
+                WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
